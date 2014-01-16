@@ -21,5 +21,7 @@ while True:
     print c.recv(1000)
     print 'Got connection from', client_host, client_port
     c.send('HTTP/1.0 200 OK\nContent-Type: text/html\n\n')
+    # @comment JS          ^^                       ^^^^  suppose to be \r\n. but it worked for me just fine.
     c.send('<h1>Hello, world</h1> this is john3209\'s Web server.')
     c.close()
+
