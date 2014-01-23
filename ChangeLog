@@ -13,3 +13,4 @@
 2014-01-22 Josh Shadik <shadikjo@arctic.cse.msu.edu>
 
  * set to use content, file, and image paths, and to handle POST requests differently.
+
