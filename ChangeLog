@@ -14,3 +14,6 @@
 
  * set to use content, file, and image paths, and to handle POST requests differently.
 
+2014-01-30 Josh Shadik <shadikjo@arctic.cse.msu.edu>
+
+ * finished hw3. Added form page and the page it submits to.
