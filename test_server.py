@@ -67,11 +67,20 @@ def test_image_path():
 
     assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
 
-def test_post():
-    conn = FakeConnection("POST / HTTP/1.0\r\n\r\n")
+def test_form_get():
+    conn =  FakeConnection("GET /submit?firstname=hello&lastname=world HTTP/1.0\r\n\r\n")
 
-    expected_return = "hello world" 
-   
+    expected_return = server.connHeader + (server.submitHtml % ("hello", "world"))
+
+    server.handle_connection(conn)
+
+    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
+
+def test_form_post():
+    conn =  FakeConnection("POST /submit HTTP/1.0\r\n\r\n  \nfirstname=hello&lastname=world")
+
+    expected_return = server.connHeader + (server.submitHtml % ("hello", "world"))
+
     server.handle_connection(conn)
 
     assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
