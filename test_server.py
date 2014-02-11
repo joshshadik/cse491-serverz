@@ -118,4 +118,3 @@ def test_handle_connection_submit_post():
                                     '\r\n' + \
                                     '<h1>Hello Mr. X Y</h1>'
     server.handle_connection(conn)
-
