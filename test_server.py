@@ -118,3 +118,15 @@ def test_handle_connection_submit_post():
                                     '\r\n' + \
                                     '<h1>Hello Mr. X Y</h1>'
     server.handle_connection(conn)
+
+def test_empty_submit_post(): # this test fails
+    conn = FakeConnection("POST /submit HTTP/1.0" + \
+                          "Content-Type: application/x-www-form-urlencoded" + \
+                          "Content-Length: 30\r\n\r\n" + \
+                          "firstname=&lastname=")
+    expected_return = expected_return = 'HTTP/1.0 200 OK\r\n' + \
+                                    'Content-type: text/html\r\n' + \
+                                    '\r\n' + \
+                                    '<h1>Hello Mr.  </h1>'
+    server.handle_connection(conn)
+

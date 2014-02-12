@@ -33,6 +33,7 @@ def submit(conn, firstname, lastname):
                                         lastname = lastname))
 
 def handle_connection(conn):
+    # @js receive : spelling 
     recieve = conn.recv(1000)
     recieve = recieve.split('\n')
     con = recieve[-1]
