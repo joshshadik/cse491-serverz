@@ -42,14 +42,14 @@ def test_handle_connection():
 
     server.handle_connection(conn, env)
 
-    assert "" in conn.sent , 'Got: %s' % (repr(conn.sent),)
+    assert "Welcome" in conn.sent , 'Got: %s' % (repr(conn.sent),)
 
 def test_default_path():
     conn = FakeConnection("GET / HTTP/1.0\r\n\r\n")
    
     server.handle_connection(conn, env)
 
-    assert "" in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert "Content" in conn.sent and "File" in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
 def test_content_path():
     conn = FakeConnection("GET /content HTTP/1.0\r\n\r\n")
@@ -133,4 +133,4 @@ def test_404():
    conn = FakeConnection("GET /feiap HTTP/1.1\r\n\r\n")
    server.handle_connection(conn, env)
 
-   assert "404" in conn.sent, "Got: %s" % (repr(conn.sent),)
+   assert "404 error" in conn.sent, "Got: %s" % (repr(conn.sent),)
