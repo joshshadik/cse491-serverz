@@ -9,8 +9,8 @@ from StringIO import StringIO
 from app import make_app
 
 import quixote
-#from quixote.demo import create_publisher
-#from quixote.demo.mini_demo import create_publisher
+# from quixote.demo import create_publisher
+# from quixote.demo.mini_demo import create_publisher
 from quixote.demo.altdemo import create_publisher
 
 _the_app = None
@@ -80,9 +80,6 @@ def handle_connection(conn):
         environ['CONTENT_LENGTH'] = headers['content-length']
         while len(content) < int(headers['content-length']):
             content += conn.recv(1)
-
-        #post_content = StringIO.StringIO(post_content)
-        #environ['wsgi.input'] = cgi.FieldStorage(fp = post_content, headers=headers, environ=environ)
     else:
         environ['CONTENT_LENGTH'] = '0'
 
