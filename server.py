@@ -3,36 +3,17 @@ import random
 import socket
 import time
 from urlparse import urlparse, parse_qs
-import signal
 import cgi
 import StringIO
-import jinja2
 
-HEADER = "HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n"
-HEADER_404 = "HTTP/1.0 404 Not Found \r\nContent-type: text/html\r\n\r\n"
-defaultHtml = "<ul><li><a href='/content'>content</a></li><li><a href='/file'>file</a></li><li><a href='/image'>image</a></li><li><a href='/form'>form</a></li></ul>"
-contentHtml = "<h1>Hello, world.</h1>This is shadikjo\'s content path."
-fileHtml = "<h1>Hello, world.</h1>This is shadikjo\'s file path."
-imageHtml = "<h1>Hello, world.</h1>This is shadikjo\'s image path."
-formHtml = """<form action='/submit' method='POST'>
-<input type='text' name='firstname'>
-<input type='text' name='lastname'>
-<input type='submit'>
-</form>"""
-submitHtml = "Hello, Mr. %s %s."
+from app import simple_app
 
-TemplateDir = "./templates"
-
-BUFF_SIZE = 10
 
 def main():
     s = socket.socket()         # Create a socket object
     host = socket.getfqdn() # Get local machine name
     port = random.randint(8000, 9999)
     s.bind((host, port))        # Bind to the port
-
-    ldr = jinja2.FileSystemLoader(TemplateDir)
-    env = jinja2.Environment(loader=ldr)
 
     print 'Starting server on', host, port 
     print 'The Web server URL for this would be http://%s:%d/' % (host, port)
@@ -46,112 +27,64 @@ def main():
 
         print 'Got connection from', client_host, client_port
 
-        handle_connection(c, env)
+        handle_connection(c)
 
-def signal_handler(signum, frame):
-    raise Exception("Timed out")
-
-def handle_connection(c, env):
-    rcvData = ""
+def handle_connection(conn):
+    received = ""
 
     while True:
-        rcvData = rcvData + c.recv(1)
-        if rcvData[-4:] == "\r\n\r\n":
+        received = received + conn.recv(1)
+        if received[-4:] == "\r\n\r\n":
             break
 
+    request, data = received.split("\r\n", 1)
 
-    received = rcvData.split(" ", 2)
-    type = received[0]
-
-    if len(received) < 2:
-        return
-
-
-    if type == "POST":
-        srvRsp = handle_post(rcvData, env, c)
-    else:
-        srvRsp = handle_get(rcvData, env)
-
-    c.send(srvRsp)
-    c.close()
-
-def handle_get(rcvData, env):
-    data = urlparse(rcvData.split(" ", 2)[1])
-    path = data.path
-    path = path.lstrip('/')
-
-    formData = parse_qs(data.query)
-
-    if path == "":
-        path = "index"
-    elif path =="submit":
-        return submitGet(formData, env)
-
-    path += ".html"
-   
-    print path
-
-    try:
-        srvRsp = HEADER + env.get_template(path).render()
-    except jinja2.exceptions.TemplateNotFound:
-        srvRsp = error404(env)
-
-    return srvRsp
-
-def handle_post(rcvData, env, c):
-    path = urlparse(rcvData.split(" ", 2)[1]).path
-    path = path.lstrip('/')
-
-    reqFS = createPostFS(rcvData, c)
-
-
-    path += "Post.html"
-
-    try:
-        srvRsp = HEADER + env.get_template(path).render(reqFS)
-    except jinja2.exceptions.TemplateNotFound:
-        srvRsp = error404( env)
-
-    return srvRsp
-
-
-
-# initialize field storage object based on request data
-# specialized for post method
-def createPostFS(reqData, c): # credit to Minh Pham
-    buf = StringIO.StringIO(reqData)
+    url = urlparse(request.split(" ", 2)[1])
 
     headers = {}
 
-    buf.readline()
+    buf = StringIO.StringIO(data)
     line = buf.readline()
-
     while line != '\r\n':
-        print line.split(': ', 1)
         kv = line.split(': ', 1)
         headers[kv[0].lower()] = kv[1].strip('\r\n')
         line = buf.readline()
 
-    if 'content-length' in headers.keys():
-        buf  = StringIO.StringIO(c.recv(int(headers['content-length'])))
-   
-    env = {}
+    environ = {}
 
-    env['REQUEST_METHOD'] = 'POST'
+    environ['REQUEST_METHOD'] = request.split(' ', 1)[0]
+    environ['PATH_INFO'] = url.path
+    environ['QUERY_STRING'] = url.query
 
-    # credit to Maxwell Brown and Xavier Durand-Hollis
-    formFS = cgi.FieldStorage(fp = buf, headers=headers, environ=env)
+    if environ['REQUEST_METHOD'] == "POST":
+        environ['CONTENT_TYPE'] = headers['content-type']
+        environ['CONTENT_LENGTH'] = headers['content-length']
+        post_content = conn.recv(int(headers['content-length']))
+        print post_content
+        post_content = StringIO.StringIO(post_content)
+        environ['wsgi.input'] = cgi.FieldStorage(fp = post_content, headers=headers, environ=environ)
+    else:
+        environ['CONTENT_LENGTH'] = '0'
 
-    return formFS
+
+    response_status = ""
+    response_headers = {}
     
+    def start_response(status, headers, exc_info=None):
+        response_status = status
+        response_headers = headers
+            
+        
+    server_response = simple_app(environ, start_response)
 
-def submitGet(formData, env):
-    srvRsp = HEADER + env.get_template("submit.html").render(formData)
-    return srvRsp
 
-def error404(env):
-    srvRsp = HEADER_404 + env.get_template("404.html").render()
-    return srvRsp
+    conn.send("HTTP/1.0 {0}\r\n".format(response_status))
+    for header in response_headers:
+        conn.send("{0}: {1}\r\n".format(header[0], header[1]))
+    conn.send("\r\n")
+    conn.send(server_response)
+    conn.close()
+
 
 if __name__ == '__main__':
     main()
