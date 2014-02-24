@@ -17,21 +17,18 @@ jEnv = jinja2.Environment(loader=jLdr)
     
 
 def simple_app(environ, start_response):
-##    setup_testing_defaults(environ)
 
+        
     status = '200 OK'
     headers = [('Content-type', 'text/html')]
 
-    start_response(status, headers)
-    
     if environ['REQUEST_METHOD'] == "POST":
-##        ret = ["%s: %s\n" % (key, value)
-##               for key, value in environ.iteritems()]
-##        ret.insert(0, "This is your environ.  Hello, world!\n\n")
         ret = handle_post(environ, headers)
     elif environ['REQUEST_METHOD'] == "GET":
-        ret = handle_get(environ)
+        ret, headers = handle_get(environ)
         ret = str(ret)
+
+    start_response(status, headers)
 
     return ret
 
@@ -43,19 +40,38 @@ def handle_get(environ):
     path = environ["PATH_INFO"]
     path = path.lstrip('/')
 
+    headers = [('Content-type', 'text/html')]
+    
     formData = parse_qs(environ["QUERY_STRING"])
+
+    if "firstname" not in formData.keys():
+        formData["firstname"] = ["",]
+        
+    if "lastname" not in formData.keys():
+        formData["lastname"] = ["",]
 
     if path == "":
         path = "index"
 
-    path += ".html"
-    
-    try:
-        ret = jEnv.get_template(path).render(formData)
-    except jinja2.exceptions.TemplateNotFound:
-        ret = error404(environ)
+    if path == "image":
+        headers = [('Content-type', 'image/jpeg')]
+        fp = open("image.jpg", "rb")
+        ret = fp.read()
+        fp.close()
+    elif path == "file":
+        headers = [('Content-type', 'text/plain')]
+        fp = open("file.txt", "rb")
+        ret = fp.read()
+        fp.close()       
+    else:
+        path += ".html"
+        
+        try:
+            ret = jEnv.get_template(path).render(formData)
+        except jinja2.exceptions.TemplateNotFound:
+            ret = error404(environ)
 
-    return ret
+    return ret, headers
 
 def handle_post(environ, headers):
     path = environ["PATH_INFO"]
@@ -63,8 +79,16 @@ def handle_post(environ, headers):
 
     post_data = {}
 
-    for key in environ["wsgi.input"].keys():
-        post_data[key] = environ["wsgi.input"][key].value.split()        
+    formData =  cgi.FieldStorage(fp = environ['wsgi.input'], headers=headers, environ=environ)
+
+    if "firstname" not in formData.keys():
+        post_data["firstname"] = ["",]
+        
+    if "lastname" not in formData.keys():
+        post_data["lastname"] = ["",]
+        
+    for key in formData.keys():
+        post_data[key] = formData[key].value.split()
 
     path += ".html"
 

@@ -4,9 +4,25 @@ import socket
 import time
 from urlparse import urlparse, parse_qs
 import cgi
-import StringIO
+from StringIO import StringIO
 
-from app import simple_app
+from app import make_app
+
+import quixote
+#from quixote.demo import create_publisher
+#from quixote.demo.mini_demo import create_publisher
+from quixote.demo.altdemo import create_publisher
+
+_the_app = None
+
+##def make_app():
+##    global _the_app
+##
+##    if _the_app is None:
+##        p = create_publisher()
+##        _the_app = quixote.get_wsgi_app()
+##
+##    return _the_app
 
 
 def main():
@@ -43,7 +59,7 @@ def handle_connection(conn):
 
     headers = {}
 
-    buf = StringIO.StringIO(data)
+    buf = StringIO(data)
     line = buf.readline()
     while line != '\r\n':
         kv = line.split(': ', 1)
@@ -55,18 +71,23 @@ def handle_connection(conn):
     environ['REQUEST_METHOD'] = request.split(' ', 1)[0]
     environ['PATH_INFO'] = url.path
     environ['QUERY_STRING'] = url.query
+    environ['SCRIPT_NAME'] = ''
 
+    
+    content = ''
     if environ['REQUEST_METHOD'] == "POST":
         environ['CONTENT_TYPE'] = headers['content-type']
         environ['CONTENT_LENGTH'] = headers['content-length']
-        post_content = conn.recv(int(headers['content-length']))
-        print post_content
-        post_content = StringIO.StringIO(post_content)
-        environ['wsgi.input'] = cgi.FieldStorage(fp = post_content, headers=headers, environ=environ)
+        while len(content) < int(headers['content-length']):
+            content += conn.recv(1)
+
+        #post_content = StringIO.StringIO(post_content)
+        #environ['wsgi.input'] = cgi.FieldStorage(fp = post_content, headers=headers, environ=environ)
     else:
         environ['CONTENT_LENGTH'] = '0'
 
 
+    environ['wsgi.input'] = StringIO(content)
     response_status = ""
     response_headers = {}
     
@@ -74,15 +95,17 @@ def handle_connection(conn):
         response_status = status
         response_headers = headers
             
-        
-    server_response = simple_app(environ, start_response)
+
+    app = make_app()
+    server_response = app(environ, start_response)
 
 
     conn.send("HTTP/1.0 {0}\r\n".format(response_status))
     for header in response_headers:
         conn.send("{0}: {1}\r\n".format(header[0], header[1]))
     conn.send("\r\n")
-    conn.send(server_response)
+    for data in server_response:
+        conn.send(data)
     conn.close()
 
 

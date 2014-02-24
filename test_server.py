@@ -63,14 +63,14 @@ def test_file_path():
    
     server.handle_connection(conn, env)
 
-    assert "file" in conn.sent , 'Got: %s' % (repr(conn.sent),)
+    assert "text/plain" in conn.sent , 'Got: %s' % (repr(conn.sent),)
 
 def test_image_path():
     conn = FakeConnection("GET /image HTTP/1.0\r\n\r\n")
    
     server.handle_connection(conn, env)
 
-    assert "image" in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert "image/jpeg" in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
 def test_form_get():
     conn =  FakeConnection("GET /submit?firstname=hello&lastname=world HTTP/1.0\r\n\r\n")
