@@ -6,23 +6,25 @@ from urlparse import urlparse, parse_qs
 import cgi
 from StringIO import StringIO
 
-from app import make_app
+# from app import make_app
 
 import quixote
 # from quixote.demo import create_publisher
 # from quixote.demo.mini_demo import create_publisher
-from quixote.demo.altdemo import create_publisher
+# from quixote.demo.altdemo import create_publisher
+import imageapp
 
 _the_app = None
 
-##def make_app():
-##    global _the_app
-##
-##    if _the_app is None:
-##        p = create_publisher()
-##        _the_app = quixote.get_wsgi_app()
-##
-##    return _the_app
+def make_app():
+    global _the_app
+
+    if _the_app is None:
+        imageapp.setup()
+        p = imageapp.create_publisher()
+        _the_app = quixote.get_wsgi_app()
+
+    return _the_app
 
 
 def main():
@@ -48,10 +50,10 @@ def main():
 def handle_connection(conn):
     received = ""
 
-    while True:
-        received = received + conn.recv(1)
-        if received[-4:] == "\r\n\r\n":
-            break
+    received = conn.recv(1)
+
+    while received[-4:] != '\r\n\r\n':
+        received += conn.recv(1)
 
     request, data = received.split("\r\n", 1)
 
@@ -67,8 +69,6 @@ def handle_connection(conn):
         line = buf.readline()
 
     environ = {}
-
-    print conn.getsockname()
 
     environ['REQUEST_METHOD'] = request.split(' ', 1)[0]
     environ['PATH_INFO'] = url.path
@@ -93,6 +93,8 @@ def handle_connection(conn):
     else:
         environ['CONTENT_LENGTH'] = '0'
 
+    if 'cookie' in headers.keys():
+        environ['HTTP_COOKIE'] = headers['cookie']
 
     environ['wsgi.input'] = StringIO(content)
     response_status = ""

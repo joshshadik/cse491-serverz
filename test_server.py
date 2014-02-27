@@ -35,40 +35,43 @@ class FakeConnection(object):
     def close(self):
         self.is_closed = True
 
+    def getsockname(self):
+        return ("address", "port")
+
 # Test a basic GET call.
 
 def test_handle_connection():
     conn = FakeConnection("GET / HTTP/1.0\r\n\r\n")
 
-    server.handle_connection(conn, env)
+    server.handle_connection(conn)
 
     assert "Welcome" in conn.sent , 'Got: %s' % (repr(conn.sent),)
 
 def test_default_path():
     conn = FakeConnection("GET / HTTP/1.0\r\n\r\n")
    
-    server.handle_connection(conn, env)
+    server.handle_connection(conn)
 
     assert "Content" in conn.sent and "File" in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
 def test_content_path():
     conn = FakeConnection("GET /content HTTP/1.0\r\n\r\n")
    
-    server.handle_connection(conn, env)
+    server.handle_connection(conn)
 
     assert "content" in conn.sent , 'Got: %s' % (repr(conn.sent),)
 
 def test_file_path():
     conn = FakeConnection("GET /file HTTP/1.0\r\n\r\n")
    
-    server.handle_connection(conn, env)
+    server.handle_connection(conn)
 
     assert "text/plain" in conn.sent , 'Got: %s' % (repr(conn.sent),)
 
 def test_image_path():
     conn = FakeConnection("GET /image HTTP/1.0\r\n\r\n")
    
-    server.handle_connection(conn, env)
+    server.handle_connection(conn)
 
     assert "image/jpeg" in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
@@ -76,7 +79,7 @@ def test_form_get():
     conn =  FakeConnection("GET /submit?firstname=hello&lastname=world HTTP/1.0\r\n\r\n")
 
 
-    server.handle_connection(conn, env)
+    server.handle_connection(conn)
 
     assert "Mr. hello world" in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
@@ -95,7 +98,7 @@ def test_form_post():
     'firstname=hello&lastname=world&submit=Submit+Query\r\n')
 
 
-    server.handle_connection(conn, env)
+    server.handle_connection(conn)
 
     assert "Mr. hello world" in conn.sent , 'Got: %s' % (repr(conn.sent),)
 
@@ -125,12 +128,12 @@ def test_form_post__multi():
 	'Submit Query\r\n' +\
 	'-----------------------------10925359777073771901781915428--\r\n'
     conn = FakeConnection(reqString)
-    server.handle_connection(conn, env)
+    server.handle_connection(conn)
 
     assert "Mr. hello world" in conn.sent, 'Wrong page: %s' % (repr(conn.sent),)
 
 def test_404():
    conn = FakeConnection("GET /feiap HTTP/1.1\r\n\r\n")
-   server.handle_connection(conn, env)
+   server.handle_connection(conn)
 
    assert "404 error" in conn.sent, "Got: %s" % (repr(conn.sent),)
