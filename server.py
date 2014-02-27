@@ -68,10 +68,20 @@ def handle_connection(conn):
 
     environ = {}
 
+    print conn.getsockname()
+
     environ['REQUEST_METHOD'] = request.split(' ', 1)[0]
     environ['PATH_INFO'] = url.path
     environ['QUERY_STRING'] = url.query
     environ['SCRIPT_NAME'] = ''
+    environ['SERVER_NAME'] = "{0}".format(conn.getsockname()[0])
+    environ['SERVER_PORT'] = "{0}".format(conn.getsockname()[1])
+    environ['wsgi.version'] = ('',)
+    environ['wsgi.errors'] = StringIO()
+    environ['wsgi.multithread'] = 0
+    environ['wsgi.multiprocess'] = 0
+    environ['wsgi.run_once'] = 0
+    environ['wsgi.url_scheme'] = 'http'
 
     
     content = ''
