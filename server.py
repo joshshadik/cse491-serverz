@@ -73,6 +73,8 @@ def handle_connection(conn):
     received = ""
 
     received = conn.recv(1)
+ 
+    print received
 
     while received[-4:] != '\r\n\r\n':
         received += conn.recv(1)
