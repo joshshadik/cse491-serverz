@@ -5,6 +5,7 @@ from urlparse import urlparse, parse_qs
 import cgi
 import StringIO
 import jinja2
+from wsgiref.validate import validator
 
 HEADER = "HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n"
 HEADER_404 = "HTTP/1.0 404 Not Found \r\nContent-type: text/html\r\n\r\n"
@@ -30,10 +31,10 @@ def simple_app(environ, start_response):
 
     start_response(status, headers)
 
-    return ret
+    return [ret]
 
 def make_app():
-    return simple_app
+    return validator(simple_app)
 
 
 def handle_get(environ):
