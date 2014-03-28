@@ -18,4 +18,4 @@ for quixote)
 15.) run in screen, so we can exit ssh and still let it run
 
 my url:
-http://ec2-54-203-140-204.us-west-2.compute.amazonaws.com/
+http://54.245.96.57/
