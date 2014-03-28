@@ -3,8 +3,35 @@
 {% block content %}
 Upload a PNG:
 
-<form enctype='multipart/form-data' action='upload_receive' method='POST'>
+<form enctype='multipart/form-data'>
 Filename: <input type='file' name='file'><p>
-<input type='submit'>
+<input  type='button' value='Upload'>
 </form>
+
+<script type="text/javascript">
+$(':button').click(function(){
+    console.log("uploading");
+    var formData = new FormData($('form')[0]);
+    $.ajax({
+        url: 'upload_receive',  //Server script to process data
+        type: 'POST',
+        xhr: function() {  // Custom XMLHttpRequest
+            var myXhr = $.ajaxSettings.xhr();
+            return myXhr;
+        },
+        //Ajax events
+        success: completeHandler,
+        // Form data
+        data: formData,
+        //Options to tell jQuery not to process data or worry about content-type.
+        cache: false,
+        contentType: false,
+        processData: false
+    });
+});
+
+function completeHandler (data) {
+   console.log("complet upload");
+}
+</script>
 {% endblock %}

@@ -6,31 +6,53 @@ from urlparse import urlparse, parse_qs
 import cgi
 from StringIO import StringIO
 
-# from app import make_app
+import argparse
+
+from app import make_app
 
 import quixote
 # from quixote.demo import create_publisher
 # from quixote.demo.mini_demo import create_publisher
-# from quixote.demo.altdemo import create_publisher
+from quixote.demo.altdemo import create_publisher
 import imageapp
+
+apps = ['image', 'altdemo', 'myapp']
 
 _the_app = None
 
-def make_app():
-    global _the_app
 
-    if _the_app is None:
-        imageapp.setup()
-        p = imageapp.create_publisher()
-        _the_app = quixote.get_wsgi_app()
+def make_imageapp():
+    imageapp.setup()
+    p = imageapp.create_publisher()
+    return quixote.get_wsgi_app() 
 
-    return _the_app
-
+def make_altdemo():
+    create_publisher()
+    return quixote.get_wsgi_app()
 
 def main():
+    global _the_app
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-A', default = apps[0], choices = apps, help = 'Select app to run.')
+    parser.add_argument('-p', default=10000, type=int, help = 'Select a port to run on.')
+    args = parser.parse_args()
+
+    if args.A == 'image':
+        _the_app = make_imageapp()
+    elif args.A == 'altdemo':
+        _the_app = make_altdemo()
+    elif args.A == 'myapp':
+        _the_app = make_app()
+
+
     s = socket.socket()         # Create a socket object
     host = socket.getfqdn() # Get local machine name
-    port = random.randint(8000, 9999)
+   
+    if args.p == 10000:
+        port = random.randint(8000, 9999)
+    else:
+        port = args.p
+
     s.bind((host, port))        # Bind to the port
 
     print 'Starting server on', host, port 
@@ -51,6 +73,8 @@ def handle_connection(conn):
     received = ""
 
     received = conn.recv(1)
+ 
+    print received
 
     while received[-4:] != '\r\n\r\n':
         received += conn.recv(1)
@@ -104,8 +128,10 @@ def handle_connection(conn):
         response_status = status
         response_headers = headers
             
-
-    app = make_app()
+    if _the_app is not None:
+        app = _the_app 
+    else:
+        app = make_app()
     server_response = app(environ, start_response)
 
 
