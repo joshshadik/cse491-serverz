@@ -2,36 +2,41 @@
 
 {% block content %}
 Upload a PNG:
-
 <form enctype='multipart/form-data'>
-Filename: <input type='file' name='file'><p>
-<input  type='button' value='Upload'>
+Filename: <input type='file' name='file' id="file"><p>
+<input type='submit'>
 </form>
 
-<script type="text/javascript">
-$(':button').click(function(){
-    console.log("uploading");
-    var formData = new FormData($('form')[0]);
-    $.ajax({
-        url: 'upload_receive',  //Server script to process data
-        type: 'POST',
-        xhr: function() {  // Custom XMLHttpRequest
-            var myXhr = $.ajaxSettings.xhr();
-            return myXhr;
-        },
-        //Ajax events
-        success: completeHandler,
-        // Form data
-        data: formData,
-        //Options to tell jQuery not to process data or worry about content-type.
-        cache: false,
-        contentType: false,
-        processData: false
-    });
-});
+<div id="recent_image">
 
-function completeHandler (data) {
-   console.log("complet upload");
-}
+</div>
+
+<script type='text/javascript'>
+$(function()
+{
+
+    $("form").submit(function(e)
+    {	
+	var formData = new FormData();
+	formData.append('file', $("#file")[0].files[0]);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', '/upload_receive', true);
+
+        xhr.onreadystatechange = function()
+        {
+            if(xhr.readyState == 4 && xhr.status == 200)
+            {
+                console.log("uploaded"); 
+                $("#recent_image").hide().html("Uploaded image: <br/> <img src='image_raw?special=latest'/>").fadeIn('fast');
+            }
+        }
+        xhr.send(formData);
+	e.preventDefault();
+    });
+
+});
 </script>
+
+
 {% endblock %}
