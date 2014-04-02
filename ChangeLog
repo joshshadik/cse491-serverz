@@ -1,3 +1,10 @@
+2014-04-01 Josh Shadik
+
+ * hw10: 
+ *   - static ip & domain name (joshshadik.com)
+ *   - image metadata (image name and description)
+
+
 2014-03-27 Josh Shadik
 
  * hw9: fixed ajax from last hw. put imageapp on ubuntu server through amazon aws. (instructions in file
