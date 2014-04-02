@@ -79,10 +79,13 @@ def handle_connection(conn):
     received = ""
 
     received = conn.recv(1)
- 
-    print received
 
-    while received[-4:] != '\r\n\r\n':
+    if len(received) == 0:
+        return
+ 
+    # print received
+
+    while '\r\n\r\n' not in received:
         received += conn.recv(1)
 
     request, data = received.split("\r\n", 1)
