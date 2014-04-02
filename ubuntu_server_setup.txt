@@ -1,0 +1,21 @@
+1.) create an account for amazon web services.
+2.) head to EC2 section
+3.) Launch Instance
+4.) select Ubuntu Server
+5.) add to allow http in security group
+6.) click Review and Launch button
+7.) then click Launch
+8.) create the public/private key pair
+9.) find the public dns in Instances
+
+after getting in through ssh:
+10.) download virtualenv
+11.) activate it
+12.) download quixote and jinja2 one way or another (couldn't get pip to work
+for quixote)
+13.) install git. clone repository. ( I just used the day16 one)
+14.) change port to 80
+15.) run in screen, so we can exit ssh and still let it run
+
+my url:
+http://54.245.96.57/

@@ -1,3 +1,9 @@
+2014-03-27 Josh Shadik
+
+ * hw9: fixed ajax from last hw. put imageapp on ubuntu server through amazon aws. (instructions in file
+ * "ubuntu_server_setup.txt" )
+
+
 2014-03-20 Josh Shadik
 
  * hw8: added ability to upload images through ajax in the image app, by changing the default /upload page

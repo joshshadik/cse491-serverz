@@ -9,14 +9,16 @@ from StringIO import StringIO
 import argparse
 
 from app import make_app
-
 import quixote
 # from quixote.demo import create_publisher
 # from quixote.demo.mini_demo import create_publisher
 from quixote.demo.altdemo import create_publisher
 import imageapp
+from quotes.apps import QuotesApp 
+from chat.apps import ChatApp 
 
-apps = ['image', 'altdemo', 'myapp']
+
+apps = ['image', 'altdemo', 'myapp', 'quotes', 'chat']
 
 _the_app = None
 
@@ -43,6 +45,10 @@ def main():
         _the_app = make_altdemo()
     elif args.A == 'myapp':
         _the_app = make_app()
+    elif args.A == 'quotes':
+        _the_app = QuotesApp('quotes/quotes.txt', './quotes/html')
+    elif args.A == 'chat':
+        _the_app = ChatApp('./chat/html')
 
 
     s = socket.socket()         # Create a socket object
