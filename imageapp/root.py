@@ -12,9 +12,12 @@ class RootDirectory(Directory):
     def index(self):
         return html.render('index.html')
 
-    @export(name='jquery')
+    @export(name="jquery")
     def jquery(self):
-        return open('jquery-1.3.2.min.js').read()
+        dirname = os.path.dirname(__file__)
+        dirname = os.path.join(dirname,"")
+        jquery_path = os.path.join(dirname,'jquery-1.3.2.min.js')
+        return open(jquery_path).read()
 
     @export(name='upload')
     def upload(self):
@@ -30,7 +33,7 @@ class RootDirectory(Directory):
         print 'received file with name:', the_file.base_filename
         data = the_file.read(int(1e9))
 
-        image.add_image(data)
+        image.add_image(data, "image name", "image description")
 
         return quixote.redirect('./')
 
@@ -48,7 +51,7 @@ class RootDirectory(Directory):
         print 'received file with name:', the_file.base_filename
         data = the_file.read(int(1e9))
 
-        image.add_image(data)
+        image.add_image(data, "image name", "image description")
 
         return html.render('upload2_received.html')
 
