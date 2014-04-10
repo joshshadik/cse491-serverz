@@ -1,6 +1,7 @@
 import quixote
 from quixote.directory import Directory, export, subdir
 from quixote.util import StaticFile
+from quixote.session import SessionManager, Session
 import os.path
 
 from . import html, image
@@ -8,8 +9,28 @@ from . import html, image
 class RootDirectory(Directory):
     _q_exports = []
 
+
     @export(name='')                    # this makes it public.
     def index(self):
+        
+        # if not self.sessionManager.has_session_cookie():            
+        #     session = self.sessionManager.new_session(self.sessionManager._make_session_id())
+        #     self.sessionManager.maintain_session(session)
+        #     self.sessionManager.set_session_cookie(session.id)
+        #     print "creating session"
+        # else:
+        #     session = self.sessionManager.get_session()
+        #     print "has session already"
+
+        session = quixote.get_session()
+
+        # self.sessionManager.get_session()
+        # session = self.sessionManager.get_session()
+        # self.sessionManager.maintain_session(session)
+        # session = self.sessionManager.get_session()
+        if session is not None:
+            print session.id
+
         return html.render('index.html')
 
     @export(name="jquery")
