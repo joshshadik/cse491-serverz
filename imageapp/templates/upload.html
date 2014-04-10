@@ -2,33 +2,37 @@
 
 {% block content %}
 Upload a PNG:
-<form enctype='multipart/form-data'>
-Filename: <input type='file' name='file' id="file"><p>
-<input type='submit'>
+<form enctype='multipart/form-data' action='upload_receive' method='POST'>
+
+    <div id="recent_image"></div>
+
+    Filename: <input type='file' name='file' id="file"> <br />
+
+    Image Name: <input type='text' name='image_name' id='image_name'> <br />
+    Image Description: <input type='text' name='image_description' id='image_description'> <br />
+
+    <input type='submit' value="Save">
+
 </form>
 
-<div id="recent_image">
-
-</div>
 
 <script type='text/javascript'>
 $(function()
 {
 
-    $("form").submit(function(e)
+    $("#file").change(function(e)
     {	
 	var formData = new FormData();
 	formData.append('file', $("#file")[0].files[0]);
 
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '/upload_receive', true);
+	xhr.open('POST', '/upload_temp', true);
 
         xhr.onreadystatechange = function()
         {
             if(xhr.readyState == 4 && xhr.status == 200)
             {
-                console.log("uploaded"); 
-                $("#recent_image").hide().html("Uploaded image: <br/> <img src='image_raw?special=latest'/>").fadeIn('fast');
+                $("#recent_image").hide().html("<img src='image_temp'/>").fadeIn('fast');
             }
         }
         xhr.send(formData);

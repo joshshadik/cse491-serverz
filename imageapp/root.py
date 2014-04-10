@@ -29,13 +29,30 @@ class RootDirectory(Directory):
         print request.form.keys()
 
         the_file = request.form['file']
+        name = request.form["image_name"]
+        description = request.form["image_description"]
+
         print dir(the_file)
         print 'received file with name:', the_file.base_filename
         data = the_file.read(int(1e9))
 
-        image.add_image(data, "image name", "image description")
+        image.add_image(data, name, description)
 
-        return quixote.redirect('./')
+        # return quixote.redirect('./image')
+
+        return html.render('image.html', {'image_name' : image.get_latest_image()[1], 'image_description' : image.get_latest_image()[2]})
+
+    @export(name='upload_temp')
+    def upload_temp(self):
+        request = quixote.get_request()
+
+        the_file = request.form['file']
+        data = the_file.read(int(1e9))
+
+        image.add_temp(data)
+
+        return 
+
 
     @export(name='upload2')
     def upload2(self):
@@ -57,11 +74,18 @@ class RootDirectory(Directory):
 
     @export(name='image')
     def image(self):
-        return html.render('image.html')
+        return html.render('image.html', {'image_name' : image.get_latest_image()[1], 'image_description' : image.get_latest_image()[2]})
 
     @export(name='image_raw')
     def image_raw(self):
         response = quixote.get_response()
         response.set_content_type('image/png')
-        img = image.get_latest_image()
+        img = image.get_latest_image()[0]
+        return img
+
+    @export(name='image_temp')
+    def image_temp(self):
+        response = quixote.get_response()
+        response.set_content_type('image/png')
+        img = image.get_temp()
         return img
