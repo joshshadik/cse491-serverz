@@ -7,10 +7,10 @@ db = sqlite3.connect('images.sqlite')
 db.text_factory = bytes
 
 
-def insert(image_data, image_name, image_description):
+def insert(image_data, image_name, image_description, mimetype):
 	c = db.cursor()
 	# insert!
-	c.execute('INSERT INTO image_store (image, name, description) VALUES (?, ?, ?)', (image_data, image_name, image_description))
+	c.execute('INSERT INTO image_store (image, name, description, mimetype) VALUES (?, ?, ?, ?)', (image_data, image_name, image_description, mimetype))
 
 	row_id = c.lastrowid
 
@@ -23,7 +23,7 @@ def retrieve(image_id):
 	c = db.cursor()
 
 	# select all of the images
-	c.execute('SELECT i, image, name, description FROM image_store  WHERE i=(?)', (image_id))
+	c.execute('SELECT i, image, name, description, mimetype FROM image_store  WHERE i=(?)', (image_id))
 	#          ^      ^             ^           ^
 	#          ^      ^             ^           ^----- details of ordering/limits
 	#          ^      ^             ^
@@ -35,9 +35,9 @@ def retrieve(image_id):
 
 
 	# grab the first result (this will fail if no results!)
-	i, image, name, description = c.fetchone()
+	i, image, name, description, mimetype = c.fetchone()
 
-	return [image, name, description]
+	return [image, name, description, mimetype]
 
 	# write 'image' data out to sys.argv[1]
 	# print 'writing image', i
@@ -52,7 +52,7 @@ def retrieve_all_keys():
 
 def retrieve_all():
 	c = db.cursor()
-	c.execute('SELECT i, image, name, description FROM image_store ORDER BY i ASC')
+	c.execute('SELECT i, name, description, mimetype FROM image_store ORDER BY i ASC')
 
 	return c.fetchall()	
 
@@ -60,7 +60,7 @@ def retrieve_latest():
 	c = db.cursor()
 
 	# select all of the images
-	c.execute('SELECT i, image, name, description FROM image_store ORDER BY i DESC LIMIT 1')
+	c.execute('SELECT i, image, name, description, mimetype FROM image_store ORDER BY i DESC LIMIT 1')
 	#          ^      ^             ^           ^
 	#          ^      ^             ^           ^----- details of ordering/limits
 	#          ^      ^             ^
@@ -72,6 +72,6 @@ def retrieve_latest():
 
 
 	# grab the first result (this will fail if no results!)
-	i, image, name, description = c.fetchone()
+	i, image, name, description, mimetype = c.fetchone()
 
-	return i, image, name, description
+	return i, [image, name, description, mimetype]
