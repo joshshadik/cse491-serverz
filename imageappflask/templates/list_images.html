@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>
+{% for image in images %}
+	<a href='/img/{{ image[0] }}'>
+		<img width=60px src='../image_raw/{{ image[0] }}'/>
+		<span id="image_name" >{{ image[1] }}</span>
+	</a>
+	<br />
+{% endfor %}
+</p>
+
+
+{% endblock %}
