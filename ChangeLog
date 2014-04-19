@@ -1,3 +1,12 @@
+2014-04-10 Josh Shadik
+
+* hw11:
+*   - implement imageapp with flask (run with '-A flask')
+*   - can reference images by their number (e.g. '/image_raw/10')
+*   
+*   set up sqlite database with create_database.py
+
+
 2014-04-01 Josh Shadik
 
  * hw10: 

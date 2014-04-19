@@ -14,11 +14,12 @@ import quixote
 # from quixote.demo.mini_demo import create_publisher
 from quixote.demo.altdemo import create_publisher
 import imageapp
+import imageappflask
 from quotes.apps import QuotesApp 
 from chat.apps import ChatApp 
+import cookieapp
 
-
-apps = ['image', 'altdemo', 'myapp', 'quotes', 'chat']
+apps = ['image', 'altdemo', 'myapp', 'quotes', 'chat', 'flask', 'cookie']
 
 _the_app = None
 
@@ -31,6 +32,9 @@ def make_imageapp():
 def make_altdemo():
     create_publisher()
     return quixote.get_wsgi_app()
+
+def make_flask():
+    return imageappflask.get_wsgi_app()
 
 def main():
     global _the_app
@@ -49,6 +53,10 @@ def main():
         _the_app = QuotesApp('quotes/quotes.txt', './quotes/html')
     elif args.A == 'chat':
         _the_app = ChatApp('./chat/html')
+    elif args.A == 'flask':
+        _the_app = make_flask()
+    elif args.A == 'cookie':
+        _the_app = cookieapp.wsgi_app
 
 
     s = socket.socket()         # Create a socket object
@@ -109,6 +117,7 @@ def handle_connection(conn):
     environ['SCRIPT_NAME'] = ''
     environ['SERVER_NAME'] = "{0}".format(conn.getsockname()[0])
     environ['SERVER_PORT'] = "{0}".format(conn.getsockname()[1])
+    environ['CONTENT_TYPE'] = 'text/html'
     environ['wsgi.version'] = ('',)
     environ['wsgi.errors'] = StringIO()
     environ['wsgi.multithread'] = 0
@@ -130,12 +139,15 @@ def handle_connection(conn):
         environ['HTTP_COOKIE'] = headers['cookie']
 
     environ['wsgi.input'] = StringIO(content)
-    response_status = ""
-    response_headers = {}
+
     
     def start_response(status, headers, exc_info=None):
-        response_status = status
-        response_headers = headers
+        conn.send("HTTP/1.0 {0}\r\n".format(status))
+        for header in headers:
+            conn.send("{0}: {1}\r\n".format(header[0], header[1]))
+        conn.send("\r\n")
+
+
             
     if _the_app is not None:
         app = _the_app 
@@ -144,10 +156,7 @@ def handle_connection(conn):
     server_response = app(environ, start_response)
 
 
-    conn.send("HTTP/1.0 {0}\r\n".format(response_status))
-    for header in response_headers:
-        conn.send("{0}: {1}\r\n".format(header[0], header[1]))
-    conn.send("\r\n")
+
     for data in server_response:
         conn.send(data)
     conn.close()
