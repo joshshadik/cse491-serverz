@@ -2,7 +2,7 @@
 
 {% block content %}
 Upload a PNG:
-<form enctype='multipart/form-data' action='/upload_receive' method='POST'>
+<form enctype='multipart/form-data' action='/upload_receive/' method='POST'>
 
     <div id="recent_image"></div>
 
@@ -26,13 +26,13 @@ $(function()
 	    formData.append('file', $("#file")[0].files[0]);
 
 	    var xhr = new XMLHttpRequest();
-	    xhr.open('POST', '/upload_temp', true);
+	    xhr.open('POST', '/upload_temp/', true);
     
         xhr.onreadystatechange = function()
         {
             if(xhr.readyState == 4 && xhr.status == 200)
             {
-                $("#recent_image").hide().html("<img src='/image_temp'/>").fadeIn('fast');
+                $("#recent_image").hide().html("<img src='/image_temp/'/>").fadeIn('fast');
             }
         }
         xhr.send(formData);

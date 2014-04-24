@@ -6,6 +6,10 @@ import sqlite3
 db = sqlite3.connect('images.sqlite')
 db.execute('CREATE TABLE image_store (i INTEGER PRIMARY KEY, image BLOB, name text, description text, mimetype text)');
 db.commit()
+
+db.execute('CREATE TABLE comments (i INTEGER PRIMARY KEY, image_id INTEGER, comment text)')
+db.commit()
+
 db.close()
 
 # here, the database is images.sqlite; it contains one table, image_store;

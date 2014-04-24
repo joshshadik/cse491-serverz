@@ -52,7 +52,7 @@ def retrieve_all_keys():
 
 def retrieve_all():
 	c = db.cursor()
-	c.execute('SELECT i, name, description, mimetype FROM image_store ORDER BY i ASC')
+	c.execute('SELECT i, image, name, description, mimetype FROM image_store ORDER BY i ASC')
 
 	return c.fetchall()	
 
@@ -74,4 +74,29 @@ def retrieve_latest():
 	# grab the first result (this will fail if no results!)
 	i, image, name, description, mimetype = c.fetchone()
 
-	return i, [image, name, description, mimetype]
+	return i
+
+def search(query):
+	c = db.cursor()
+
+	query = '%' + query + '%'
+
+	c.execute("SELECT i, image, name, description, mimetype FROM image_store WHERE name LIKE '%s' or description LIKE '%s'" % (query, query))
+
+	return c.fetchall()
+
+def add_comment(image_id, comment):
+        c = db.cursor()
+	c.execute('INSERT INTO comments (image_id, comment) VALUES (?, ?)', (image_id, comment))
+	db.commit()
+
+	row_id = c.lastrowid
+
+	return row_id
+
+
+def get_comments(image_id):
+	c = db.cursor()
+	c.execute('SELECT comment FROM comments WHERE image_id=?', image_id)
+
+	return c.fetchall()

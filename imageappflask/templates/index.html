@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<a href='upload'>Upload an image</a> |
-<a href='img'>Show most recent image</a> |
-<a href="all_imgs">All images</a>
+<a href='upload/'>Upload an image</a> |
+<a href='img/'>Show most recent image</a> |
+<a href="all_imgs/">All images</a> |
+<form action="img_search/" method="POST">
+    Search: <input name="image_query" type='text' />
+    <input type='submit' />
+</form>
 <p>
 <h2>Version 2</h2>
-<a href='upload2'>Upload an image</a> |
-<a href='img'>Show most recent image</a>
+<a href='upload2/'>Upload an image</a> |
+<a href='img/'>Show most recent image</a>
 
 
 <hr>
 
-<img width=40% src='image_raw?special=latest'/>
+<img width=40% src='image_raw/'/>
 
 {% endblock %}
